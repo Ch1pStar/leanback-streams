@@ -20,7 +20,10 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -38,6 +41,7 @@ import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -58,8 +62,8 @@ public class MainFragment extends BrowseFragment {
     private static final int BACKGROUND_UPDATE_DELAY = 300;
     private static final int GRID_ITEM_WIDTH = 200;
     private static final int GRID_ITEM_HEIGHT = 200;
-    private static final int NUM_ROWS = 1;
-    private static final int NUM_COLS = 3;
+//    private static final int NUM_ROWS = 5;
+    private static int NUM_COLS = 5;
 
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
@@ -80,13 +84,30 @@ public class MainFragment extends BrowseFragment {
 
         setupUIElements();
 
-        loadRows();
 
         setupEventListeners();
 
-        Intent intent = new Intent(getActivity(), NetworkStreamService.class);
-        getActivity().getApplicationContext().startService(intent);
+        Intent networkIntent = new Intent(getActivity(), NetworkStreamService.class);
+        getActivity().getApplicationContext().startService(networkIntent);
+
+        Intent epgIntent = new Intent(getActivity(), EPGService.class);
+        epgIntent.putExtra("force-update", true);
+        getActivity().getApplicationContext().startService(epgIntent);
+
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mMessageReceiver,
+                new IntentFilter("epg-loaded"));
     }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int count = intent.getIntExtra("count", 0);
+            Log.d("receiver", "EPG Data Loaded");
+            if(count > 0 ){
+                loadRows((count/NUM_COLS), count);
+            }
+        }
+    };
 
     @Override
     public void onDestroy() {
@@ -97,24 +118,32 @@ public class MainFragment extends BrowseFragment {
         }
     }
 
-    private void loadRows() {
-        List<Movie> list = MovieList.setupMovies(getActivity().getApplicationContext());
+    private void loadRows(int numRows, int count) {
+        Context activity = getActivity();
+        if(activity == null){
+            return;
+        }
+        List<Movie> list = MovieList.setupMovies(activity.getApplicationContext());
 
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         CardPresenter cardPresenter = new CardPresenter();
 
-//        int i;
-//        for (i = 0; i < NUM_ROWS; i++) {
-//            if (i != 0) {
-//            }
+        int i;
+        int itm = -1;
+        for (i = 0; i < numRows; i++) {
             Collections.shuffle(list);
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
             for (int j = 0; j < NUM_COLS; j++) {
-                listRowAdapter.add(list.get(j % 3));
+                itm++;
+                listRowAdapter.add(list.get(itm));
+                Log.d(TAG, "loadRows: "+itm);
+                if(itm>=(count-1)) break;
             }
-            HeaderItem header = new HeaderItem(0, MovieList.MOVIE_CATEGORY[0]);
+            HeaderItem header = new HeaderItem(0, MovieList.MOVIE_CATEGORY[0]+" "+Integer.toString(i));
             mRowsAdapter.add(new ListRow(header, listRowAdapter));
-//        }
+            itm++;
+            if(itm>=(count-1)) break;
+        }
 
 //        header = new HeaderItem(1, MovieList.MOVIE_CATEGORY[1]);
 //        EditTextPresenter editPresenter = new EditTextPresenter();
@@ -187,7 +216,7 @@ public class MainFragment extends BrowseFragment {
                 Log.i(TAG, "onItemClicked: "+((Movie) item).getTitle());
 //                Intent intent = new Intent(getActivity(), DetailsActivity.class);
 //                intent.putExtra(DetailsActivity.MOVIE, movie);
-                Intent intent = new Intent(getActivity(), VLCPlaybackActivity.class);
+                Intent intent = new Intent(getActivity(), NativePlaybackActivity.class);
                 intent.putExtra(DetailsActivity.MOVIE, movie);
 
                 Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
@@ -200,7 +229,12 @@ public class MainFragment extends BrowseFragment {
                 if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0) {
                     Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
                     startActivity(intent);
-                } else {
+                }else if(((String) item).indexOf(getString(R.string.personal_settings)) >= 0){
+                    Intent intent = new Intent(getActivity(),EPGService.class);
+                    intent.putExtra("force-update", true);
+                    getActivity().getApplicationContext().startService(intent);
+
+                }else {
                     Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT)
                             .show();
                 }

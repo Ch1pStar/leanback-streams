@@ -12,6 +12,8 @@ import android.os.Build;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.MediaController;
@@ -34,7 +36,7 @@ import org.videolan.libvlc.util.MediaBrowser;
 
 
 public class VLCVideoView extends SurfaceView
-        implements IVLCVout.Callback, MediaController.MediaPlayerControl{
+        implements IVLCVout.Callback{
 
     private static final String TAG = "VLCVideoView";
 
@@ -60,6 +62,14 @@ public class VLCVideoView extends SurfaceView
     }
 
     @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        Log.i(TAG, "onTouchEvent: NO WAY");
+        MediaPlayer.TrackDescription[] tracks = mMediaPlayer.getSpuTracks();
+        Log.i(TAG, "touch: sub tracks: "+tracks);
+        return super.onTouchEvent(event);
+    }
+
+    @Override
     public void onNewLayout(IVLCVout vlcVout, int width, int height, int visibleWidth, int visibleHeight, int sarNum, int sarDen) {
 
     }
@@ -80,7 +90,7 @@ public class VLCVideoView extends SurfaceView
 
     @Override
     public void onHardwareAccelerationError(IVLCVout vlcVout) {
-        Log.d(TAG, "onHardwareAccelerationError: BLABLABLABLA" + vlcVout.toString());
+        Log.d(TAG, "onHardwareAccelerationError: " + vlcVout.toString());
     }
 
 
@@ -95,6 +105,17 @@ public class VLCVideoView extends SurfaceView
         public void onEvent(MediaPlayer.Event event) {
             MediaPlayer player = mOwner.get().mMediaPlayer;
             switch(event.type) {
+                case MediaPlayer.Event.Vout:
+                    MediaPlayer.TrackDescription[] tracks = player.getSpuTracks();
+                    if(tracks != null){
+                        for (MediaPlayer.TrackDescription track : tracks){
+                            Log.i(TAG, "track: "+track.name+" "+track.id);
+                            if(track.id > 0){
+                                player.setSpuTrack(track.id);
+                            }
+                        }
+                    }
+                    break;
                 case MediaPlayer.Event.EndReached:
                     Log.d(TAG, "MediaPlayerEndReached");
                     player.release();
@@ -149,63 +170,66 @@ public class VLCVideoView extends SurfaceView
         vout.attachViews();
 
         mMediaPlayer.setMedia(mMedia);
+
+
+
         mMediaPlayer.play();
 
 
     }
 
     public void start() {
-        Log.d(TAG, "start: "+ this.toString());
+//        Log.d(TAG, "start: "+ this.toString());
     }
 
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public int getDuration() {
-        return 0;
-    }
-
-    @Override
-    public int getCurrentPosition() {
-        return 0;
-    }
-
-    @Override
-    public void seekTo(int pos) {
-
-    }
-
-    @Override
-    public boolean isPlaying() {
-        return false;
-    }
-
-    @Override
-    public int getBufferPercentage() {
-        return 0;
-    }
-
-    @Override
-    public boolean canPause() {
-        return false;
-    }
-
-    @Override
-    public boolean canSeekBackward() {
-        return false;
-    }
-
-    @Override
-    public boolean canSeekForward() {
-        return false;
-    }
-
-    @Override
-    public int getAudioSessionId() {
-        return 0;
-    }
+//    @Override
+//    public void pause() {
+//
+//    }
+//
+//    @Override
+//    public int getDuration() {
+//        return 0;
+//    }
+//
+//    @Override
+//    public int getCurrentPosition() {
+//        return 0;
+//    }
+//
+//    @Override
+//    public void seekTo(int pos) {
+//
+//    }
+//
+//    @Override
+//    public boolean isPlaying() {
+//        return false;
+//    }
+//
+//    @Override
+//    public int getBufferPercentage() {
+//        return 0;
+//    }
+//
+//    @Override
+//    public boolean canPause() {
+//        return false;
+//    }
+//
+//    @Override
+//    public boolean canSeekBackward() {
+//        return false;
+//    }
+//
+//    @Override
+//    public boolean canSeekForward() {
+//        return false;
+//    }
+//
+//    @Override
+//    public int getAudioSessionId() {
+//        return 0;
+//    }
 }
 

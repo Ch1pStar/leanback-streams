@@ -27,6 +27,7 @@
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -34,18 +35,35 @@
         <activity android:name=".DetailsActivity" />
         <activity android:name=".PlaybackOverlayActivity" />
         <activity android:name=".BrowseErrorActivity" />
-
         <activity
             android:name=".VLCPlaybackActivity"
             android:label="@string/title_activity_vlcplayback"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-        </activity>
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
 
         <service
             android:name=".NetworkStreamService"
             android:enabled="true"
-            android:exported="true">
-        </service>
+            android:exported="true" />
+
+        <activity
+            android:name=".NativePlaybackActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_native_playback"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/FullscreenTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="home.ned.lul.MainActivity" />
+        </activity>
+
+        <service
+            android:name=".SeparateAudioStreamService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".EPGService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

@@ -46,4 +46,8 @@
     <string name="load_a_mp3">Minimal: Play /sdcard/a.mp3</string>
     <string name="refresh">Refresh</string>
     <string name="video">Video</string>
+
+    <string name="title_activity_native_playback">NativePlaybackActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>
