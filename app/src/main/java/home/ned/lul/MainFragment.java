@@ -143,10 +143,10 @@ public class MainFragment extends BrowseFragment {
                 pgRating = channel.getPgRating();
             }
             //Exclude no-no channels
-//            if(pgRating.equals("free")){
+            if(pgRating.equals("free")){
                 HeaderItem header = new HeaderItem(0,cat);
                 mRowsAdapter.add(new ListRow(header, listRowAdapter));
-//            }
+            }
         }
 
         HeaderItem gridHeader = new HeaderItem(2, "PREFERENCES");
@@ -176,7 +176,7 @@ public class MainFragment extends BrowseFragment {
     private void setupUIElements() {
         // setBadgeDrawable(getActivity().getResources().getDrawable(
         // R.drawable.videos_by_google_banner));
-        setTitle(getString(R.string.browse_title)); // Badge, when set, takes precedent
+//        setTitle(getString(R.string.browse_title)); // Badge, when set, takes precedent
         // over title
         setHeadersState(HEADERS_ENABLED);
         setHeadersTransitionOnBackEnabled(true);
@@ -191,17 +191,14 @@ public class MainFragment extends BrowseFragment {
 
     private void setupEventListeners() {
         setOnSearchClickedListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
-                Toast.makeText(getActivity(), "Implement your own in-app search", Toast.LENGTH_LONG)
-                        .show();
+                Intent intent = new Intent(getActivity(), SearchActivity.class);
+                startActivity(intent);
             }
         });
-
         setOnItemViewClickedListener(new ItemViewClickedListener());
         setOnItemViewSelectedListener(new ItemViewSelectedListener());
-
     }
 
     private final class ItemViewClickedListener implements OnItemViewClickedListener {

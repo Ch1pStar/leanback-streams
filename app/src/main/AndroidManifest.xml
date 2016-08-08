@@ -44,9 +44,9 @@
         <activity
             android:name=".NativePlaybackActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="userLandscape"
             android:label="@string/title_activity_native_playback"
             android:parentActivityName=".MainActivity"
+            android:screenOrientation="userLandscape"
             android:theme="@style/FullscreenTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -60,7 +60,9 @@
         <service
             android:name=".EPGService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+        <activity android:name=".SearchActivity"></activity>
     </application>
 
 </manifest>

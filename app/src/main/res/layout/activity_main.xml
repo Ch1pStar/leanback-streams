@@ -13,15 +13,7 @@
     tools:context=".MainActivity"
     tools:deviceIds="tv"
     tools:ignore="MergeRootFrame"
-
-
     tools:layout="@layout/lb_image_card_view" />
-
-    <EditText
-        android:id="@+id/edit_message"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text" />
 
 </LinearLayout>
 
