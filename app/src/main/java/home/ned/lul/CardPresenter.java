@@ -17,6 +17,8 @@ package home.ned.lul;
 import android.graphics.drawable.Drawable;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.Presenter;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.ViewGroup;
 
@@ -80,11 +82,14 @@ public class CardPresenter extends Presenter {
             cardView.setTitleText(movie.getTitle());
             cardView.setContentText(movie.getStudio());
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
-            Glide.with(viewHolder.view.getContext())
-                    .load(movie.getCardImageUrl())
-                    .centerCrop()
-                    .error(mDefaultCardImage)
-                    .into(cardView.getMainImageView());
+
+            cardView.setMainImage(ContextCompat.getDrawable(viewHolder.view.getContext(), R.drawable.app_icon));
+
+//            Glide.with(viewHolder.view.getContext())
+//                    .load(movie.getCardImageUrl())
+//                    .centerCrop()
+//                    .error(mDefaultCardImage)
+//                    .into(cardView.getMainImageView());
         }
     }
 

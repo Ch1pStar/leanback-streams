@@ -15,8 +15,11 @@
 package home.ned.lul;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -123,35 +126,30 @@ public class MainFragment extends BrowseFragment {
         if(activity == null){
             return;
         }
-        List<Movie> list = MovieList.setupMovies(activity.getApplicationContext());
-
+        Map<String,  ArrayList<Movie>> list = MovieList.setupMovies(activity.getApplicationContext());
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
         CardPresenter cardPresenter = new CardPresenter();
-
-        int i;
-        int itm = -1;
-        for (i = 0; i < numRows; i++) {
-            Collections.shuffle(list);
+        Iterator it = list.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry pair = (Map.Entry)it.next();
+            String cat = (String)pair.getKey();
+            ArrayList<Movie> channels = (ArrayList<Movie>)pair.getValue();
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
-            for (int j = 0; j < NUM_COLS; j++) {
-                itm++;
-                listRowAdapter.add(list.get(itm));
-                Log.d(TAG, "loadRows: "+itm);
-                if(itm>=(count-1)) break;
+            Iterator channelIt = channels.iterator();
+            String pgRating = null;
+            while(channelIt.hasNext()){
+                Movie channel = (Movie)channelIt.next();
+                listRowAdapter.add(channel);
+                pgRating = channel.getPgRating();
             }
-            HeaderItem header = new HeaderItem(0, MovieList.MOVIE_CATEGORY[0]+" "+Integer.toString(i));
-            mRowsAdapter.add(new ListRow(header, listRowAdapter));
-            itm++;
-            if(itm>=(count-1)) break;
+            //Exclude no-no channels
+//            if(pgRating.equals("free")){
+                HeaderItem header = new HeaderItem(0,cat);
+                mRowsAdapter.add(new ListRow(header, listRowAdapter));
+//            }
         }
 
-//        header = new HeaderItem(1, MovieList.MOVIE_CATEGORY[1]);
-//        EditTextPresenter editPresenter = new EditTextPresenter();
-//        ArrayObjectAdapter editTextAdapter = new ArrayObjectAdapter(editPresenter);
-//        mRowsAdapter.add(new ListRow(header, editTextAdapter));
-
         HeaderItem gridHeader = new HeaderItem(2, "PREFERENCES");
-
         GridItemPresenter mGridPresenter = new GridItemPresenter();
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
         gridRowAdapter.add(getResources().getString(R.string.grid_view));
@@ -192,14 +190,14 @@ public class MainFragment extends BrowseFragment {
     }
 
     private void setupEventListeners() {
-//        setOnSearchClickedListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View view) {
-//                Toast.makeText(getActivity(), "Implement your own in-app search", Toast.LENGTH_LONG)
-//                        .show();
-//            }
-//        });
+        setOnSearchClickedListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getActivity(), "Implement your own in-app search", Toast.LENGTH_LONG)
+                        .show();
+            }
+        });
 
         setOnItemViewClickedListener(new ItemViewClickedListener());
         setOnItemViewSelectedListener(new ItemViewSelectedListener());
@@ -247,10 +245,7 @@ public class MainFragment extends BrowseFragment {
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
                                    RowPresenter.ViewHolder rowViewHolder, Row row) {
             if (item instanceof Movie) {
-                mBackgroundURI = ((Movie) item).getBackgroundImageURI();
-                mBackgroundColor = ((Movie) item).getColor();
-                startBackgroundTimer();
-                Log.i(TAG, "onItemSelected: "+((Movie) item).getTitle());
+                Log.i(TAG, "onItemSelected: "+((Movie) item).getInfo());
             }
 
         }

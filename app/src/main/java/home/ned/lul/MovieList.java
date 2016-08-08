@@ -9,7 +9,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class MovieList {
     private static final String TAG = "MovieList";
@@ -20,18 +22,9 @@ public final class MovieList {
 
     public static List<Movie> list;
 
-    public static List<Movie> setupMovies(Context context) {
-        list = new ArrayList<Movie>();
-        String title[] = {
-                "Nova Sport",
-                "Diema Sport",
-                "Diema Sport 2 HD",
-                "HBO",
-                "HBO +1",
-                "Cinemax",
-                "Cinemax 2"
-        };
+    public static Map<String,  ArrayList<Movie>> categories;
 
+    public static Map<String,  ArrayList<Movie>> setupMovies(Context context) {
         int color[] = {
                 ContextCompat.getColor(context, R.color.gold),
                 ContextCompat.getColor(context, R.color.red),
@@ -41,29 +34,7 @@ public final class MovieList {
                 ContextCompat.getColor(context, R.color.black),
                 ContextCompat.getColor(context, R.color.black)
         };
-        String description = "Fusce id nisi turpis. Praesent viverra bibendum semper. "
-                + "Donec tristique, orci sed semper lacinia, quam erat rhoncus massa, non congue tellus est "
-                + "quis tellus. Sed mollis orci venenatis quam scelerisque accumsan. Curabitur a massa sit "
-                + "amet mi accumsan mollis sed et magna. Vivamus sed aliquam risus. Nulla eget dolor in elit "
-                + "facilisis mattis. Ut aliquet luctus lacus. Phasellus nec commodo erat. Praesent tempus id "
-                + "lectus ac scelerisque. Maecenas pretium cursus lectus id volutpat.";
 
-        String videoUrl[] = {
-                "http://87.246.0.136:59349/tv_nova_Sport",
-                "http://87.246.0.136:59349/tv_Diema_Sport",
-                "http://87.246.0.136:59349/tv_Diema_Sport_2_HD",
-                "http://87.246.0.136:59349/tv_HBO",
-                "http://87.246.0.136:59349/tv_HBO_+1",
-                "http://87.246.0.136:59349/tv_Cinemax",
-                "http://87.246.0.136:59349/tv_Cinemax_2"
-        };
-        String bgImageUrl[] = {
-                "http://commondatastorage.googleapis.com/android-tv/Sample%20videos/Zeitgeist/Zeitgeist%202010_%20Year%20in%20Review/bg.jpg",
-                "http://commondatastorage.googleapis.com/android-tv/Sample%20videos/Demo%20Slam/Google%20Demo%20Slam_%2020ft%20Search/bg.jpg",
-                "http://commondatastorage.googleapis.com/android-tv/Sample%20videos/April%20Fool's%202013/Introducing%20Gmail%20Blue/bg.jpg",
-                "http://commondatastorage.googleapis.com/android-tv/Sample%20videos/April%20Fool's%202013/Introducing%20Google%20Fiber%20to%20the%20Pole/bg.jpg",
-                "http://commondatastorage.googleapis.com/android-tv/Sample%20videos/April%20Fool's%202013/Introducing%20Google%20Nose/bg.jpg",
-        };
         String cardImageUrl[] = {
                 "http://www.bdfbg.com/wp-content/uploads/2015/07/nova-sport-hd_logo.jpg",
                 "http://gledai-online.tv/images/diemasport.jpg",
@@ -73,42 +44,39 @@ public final class MovieList {
                 "http://1.bp.blogspot.com/-ty9NJBAITnY/TjjMmtkUDHI/AAAAAAAAB28/k6QxiNVeOVs/s500/Cinemax+logo+2011b.png",
                 "http://www.tv-logo.com/pt-data/uploads/images/logo/cinemax2_ce.jpg"
         };
-
+        categories = new HashMap<String, ArrayList<Movie>>();
 
         JSONArray epg = EPGService.getEPGData();
-
         try {
-            for (int  i=0; i<epg.length();i++){
+            for (int  i=0; i<epg.length();i++) {
                 JSONObject channel = epg.getJSONObject(i);
-                list.add(buildMovieInfo(channel.getString("genre"), channel.getString("title"),
-                    "lul", "", channel.getString("sources"), cardImageUrl[1], bgImageUrl[0],color[0]));
+                String cat = channel.getString("genre");
+                ArrayList<Movie> mList = null;
+
+                if (!categories.containsKey(cat)) {
+                    mList = new ArrayList<Movie>();
+                } else {
+                    mList = categories.get(cat);
+                }
+                String pgRating = channel.getString("pg");
+                String title = channel.getString("title");
+                String videoUrl = channel.getString("sources");
+
+                mList.add(buildMovieInfo(cat, title,
+                        "lul", "", videoUrl, cardImageUrl[1], color[i % (color.length - 1)], pgRating));
+                categories.put(cat, mList);
             }
         } catch (JSONException e) {
             Log.e(TAG, "setupMovies: ", e);
-//            e.printStackTrace();
         }
 
-//        list.add(buildMovieInfo("category", title[0],
-//                description, "", videoUrl[0], cardImageUrl[0], bgImageUrl[0],color[0]));
-//        list.add(buildMovieInfo("category", title[1],
-//                description, "", videoUrl[1], cardImageUrl[1], bgImageUrl[1],color[1]));
-//        list.add(buildMovieInfo("category", title[2],
-//                description, "", videoUrl[2], cardImageUrl[2], bgImageUrl[2],color[2]));
-//        list.add(buildMovieInfo("category", title[3],
-//                description, "", videoUrl[3], cardImageUrl[3], bgImageUrl[3],color[3]));
-//        list.add(buildMovieInfo("category", title[4],
-//                description, "", videoUrl[4], cardImageUrl[4], bgImageUrl[2],color[4]));
-//        list.add(buildMovieInfo("category", title[5],
-//                description, "", videoUrl[5], cardImageUrl[5], bgImageUrl[2],color[5]));
-//        list.add(buildMovieInfo("category", title[6],
-//                description, "", videoUrl[6], cardImageUrl[6], bgImageUrl[2],color[6]));
+        Log.d(TAG, Integer.toString(categories.size()));
 
-        return list;
+        return categories;
     }
 
     private static Movie buildMovieInfo(String category, String title,
-            String description, String studio, String videoUrl, String cardImageUrl,
-            String bgImageUrl, int color) {
+            String description, String studio, String videoUrl, String cardImageUrl, int color, String pgRating) {
         Movie movie = new Movie();
         movie.setId(Movie.getCount());
         Movie.incCount();
@@ -117,9 +85,9 @@ public final class MovieList {
         movie.setStudio(studio);
         movie.setCategory(category);
         movie.setCardImageUrl(cardImageUrl);
-        movie.setBackgroundImageUrl(bgImageUrl);
         movie.setVideoUrl(videoUrl);
         movie.setColor(color);
+        movie.setPgRating(pgRating);
         return movie;
     }
 }
