@@ -182,7 +182,7 @@ public class VideoDetailsFragment extends DetailsFragment {
                 if (action.getId() == ACTION_WATCH_TRAILER) {
 
                     Toast.makeText(getActivity(), mSelectedMovie.getVideoUrl(), Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(getActivity(), VLCPlaybackActivity.class);
+                    Intent intent = new Intent(getActivity(), NativePlaybackActivity.class);
                     intent.putExtra(DetailsActivity.MOVIE, mSelectedMovie);
                     startActivity(intent);
                 } else {

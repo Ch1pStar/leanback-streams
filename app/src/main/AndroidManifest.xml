@@ -35,10 +35,6 @@
         <activity android:name=".DetailsActivity" />
         <activity android:name=".PlaybackOverlayActivity" />
         <activity android:name=".BrowseErrorActivity" />
-        <activity
-            android:name=".VLCPlaybackActivity"
-            android:label="@string/title_activity_vlcplayback"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
 
         <service
             android:name=".NetworkStreamService"
